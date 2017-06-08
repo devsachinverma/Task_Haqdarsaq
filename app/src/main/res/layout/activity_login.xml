@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_login"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.sachu.task_haqdarshak.Login">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="10dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:weightSum="2">
+
+<TextView
+    android:padding="8dp"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:text="mobile_no"
+    android:textSize="15dp"
+    android:layout_weight=".5"/>
+
+<EditText
+    android:id="@+id/mob"
+    android:textSize="15dp"
+    android:layout_width="0dp"
+    android:hint="123"
+    android:layout_height="wrap_content"
+    android:layout_weight="1.5"/>
+
+</LinearLayout>
+
+
+
+<LinearLayout
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:weightSum="2">
+
+<TextView
+    android:padding="8dp"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:text="Password "
+    android:textSize="15dp"
+    android:layout_weight=".5"/>
+
+<EditText
+    android:id="@+id/pass"
+    android:textSize="15dp"
+    android:layout_width="0dp"
+    android:hint="abc"
+    android:layout_height="wrap_content"
+    android:layout_weight="1.5"/>
+
+</LinearLayout>
+        <Button
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:text="Login"
+            android:id="@+id/login"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</RelativeLayout>
