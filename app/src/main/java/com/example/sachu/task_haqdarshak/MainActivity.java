@@ -1,23 +1,43 @@
 package com.example.sachu.task_haqdarshak;
 
-import android.app.Activity;
+import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import java.io.File;
 
 public class MainActivity extends AppCompatActivity
 {
     private static final int CAMERA_REQUEST = 5000;
-    private ImageView imageView;
+
+    Toolbar mActionBarToolbar;
     EditText name,sex,age,email,mob_no,password;
     Button signup,login;
-    String mob_num,user_pswrd;
+    String mob_num,user_pswrd,n,s,a,e,m,p;
+    ImageView imageView;
+    Button buttonCamera, buttonGallery ;
+    File file;
+    Uri uri;
+    Intent CamIntent, GalIntent, CropIntent ;
+    public  static final int RequestPermissionCode  = 1 ;
+    DisplayMetrics displayMetrics ;
+    int width, height;
     //--------------------------------------------------------------------------------------------------
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -25,6 +45,7 @@ public class MainActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         imageView = (ImageView) this.findViewById(R.id.profile_pic);
         name = (EditText) this.findViewById(R.id.name);
         sex = (EditText) this.findViewById(R.id.sex);
@@ -34,16 +55,18 @@ public class MainActivity extends AppCompatActivity
         password = (EditText) this.findViewById(R.id.password);
         signup = (Button) this.findViewById(R.id.signup);
         login = (Button) this.findViewById(R.id.login);
-        SharedPreferences pref = getSharedPreferences("User_info", MODE_PRIVATE);
-        mob_num=pref.getString("user_mobno","");
-        user_pswrd=pref.getString("user_password","");
+        EnableRuntimePermission();
+        clearText();
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view)
             {
+                SharedPreferences pref = getSharedPreferences("User_info", MODE_PRIVATE);
+                mob_num=pref.getString("user_mobno","");
+                user_pswrd=pref.getString("user_password","");
                 Intent intent=new Intent(MainActivity.this,Login.class);
-                intent.putExtra("mobno",mob_num);
-                intent.putExtra("paswrd",user_pswrd);
+                intent.putExtra("user_mobno",mob_num);
+                intent.putExtra("user_password",user_pswrd);
                 startActivity(intent);
 
             }
@@ -56,6 +79,7 @@ public class MainActivity extends AppCompatActivity
                 Validation();
                 Saveinfo();
 
+
             }
         });
         imageView.setOnClickListener(new View.OnClickListener()
@@ -63,10 +87,10 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivityForResult(cameraIntent, CAMERA_REQUEST);
+                ClickImageFromCamera() ;
             }
         });
+
     }
     //--------------------------------------------------------------------------------------------------
     //Validation of Info
@@ -74,65 +98,191 @@ public class MainActivity extends AppCompatActivity
 
     private void Validation()
     {
-
-        if(name.getText().toString().isEmpty())
-        {
-            name.setError( "name is required!" );
+        n=name.getText().toString();
+        s=sex.getText().toString();
+        a=age.getText().toString();
+        e=email.getText().toString();
+        m=mob_no.getText().toString();
+        p=password.getText().toString();
+        SharedPreferences pref = getSharedPreferences("User_info", MODE_PRIVATE);
+        mob_num=pref.getString("user_mobno","");
+        if (n.isEmpty() || n.equals("")) {
+            name.setError("name is required!");
         }
-        if(sex.getText().toString().isEmpty())
+        else
+        if(s.isEmpty() || s.equals(""))
         {
-            sex.setError( "sex is required!" );
+            sex.setError("sex is required!");
         }
-        if(age.getText().toString().isEmpty())
+        else
+        if(a.isEmpty() || a.equals(""))
         {
-            age.setError( "age is required!" );
+            age.setError("age is required!");
         }
-        if(email.getText().toString().isEmpty())
+        else
+        if(e.isEmpty() || e.equals(""))
         {
-            email.setError( "email is required!" );
+            email.setError("email is required!");
         }
-        if(mob_no.getText().toString().isEmpty())
+        else
+        if(m.isEmpty() || m.equals(""))
         {
-            mob_no.setError( "mob_no is required!" );
+            mob_no.setError("mob_no is required!");
         }
-        if(password.getText().toString().isEmpty())
+        else
+        if(p.isEmpty() || p.equals(""))
         {
-            password.setError( "password is required!" );
+            password.setError("password is required!");
         }
-        if(mob_no.getText().toString().equals(mob_num))
+        else
+        if(m.equals(mob_num))
         {
             mob_no.setError( "Its already exist" );
         }
+
         else
         {
-            Intent intent=new Intent(MainActivity.this,Home.class);
+            Intent intent = new Intent(MainActivity.this, Home.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | IntentCompat.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
 
     }
 //--------------------------------------------------------------------------------------------------
-    //camera
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
-        if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK)
+        //Save Data using shared preferences
+
+        public void Saveinfo()
         {
-            Bitmap photo = (Bitmap) data.getExtras().get("data");
-            imageView.setImageBitmap(photo);
+            SharedPreferences pref = getSharedPreferences("User_info", MODE_PRIVATE);
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putString("user_name",n);
+            editor.putString("user_sex", s);
+            editor.putString("user_age", a);
+            editor.putString("user_email", e);
+            editor.putString("user_mobno", m);
+            editor.putString("user_password", p);
+            editor.commit();
+        }
+
+
+
+    private void clearText()
+    {
+        name.setText("");
+        sex.setText("");
+        age.setText("");
+        email.setText("");
+        mob_no.setText("");
+        password.setText("");
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    //camera
+public void ClickImageFromCamera() {
+
+    CamIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+
+    file = new File(Environment.getExternalStorageDirectory(),
+            "file" + String.valueOf(System.currentTimeMillis()) + ".jpg");
+    uri = Uri.fromFile(file);
+
+    CamIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, uri);
+
+    CamIntent.putExtra("return-data", true);
+
+    startActivityForResult(CamIntent, 0);
+
+}
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 0 && resultCode == RESULT_OK) {
+
+            ImageCropFunction();
+
+        }
+        else if (requestCode == 2) {
+
+            if (data != null) {
+
+                uri = data.getData();
+
+                ImageCropFunction();
+
+            }
+        }
+        else if (requestCode == 1) {
+
+            if (data != null) {
+
+                Bundle bundle = data.getExtras();
+
+                Bitmap bitmap = bundle.getParcelable("data");
+
+                imageView.setImageBitmap(bitmap);
+
+            }
         }
     }
-//--------------------------------------------------------------------------------------------------
-    //Save Data using shared preferences
 
-    public void Saveinfo()
-    {
-        SharedPreferences pref = getSharedPreferences("User_info", MODE_PRIVATE);
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString("user_name", name.getText().toString());
-        editor.putString("user_sex", sex.getText().toString());
-        editor.putString("user_age", age.getText().toString());
-        editor.putString("user_email", email.getText().toString());
-        editor.putString("user_mobno", mob_no.getText().toString());
-        editor.putString("user_password", password.getText().toString());
-        editor.commit();
+    public void ImageCropFunction() {
+
+        // Image Crop Code
+        try {
+            CropIntent = new Intent("com.android.camera.action.CROP");
+
+            CropIntent.setDataAndType(uri, "image/*");
+
+            CropIntent.putExtra("crop", "true");
+            CropIntent.putExtra("outputX", 180);
+            CropIntent.putExtra("outputY", 180);
+            CropIntent.putExtra("aspectX", 3);
+            CropIntent.putExtra("aspectY", 4);
+            CropIntent.putExtra("scaleUpIfNeeded", true);
+            CropIntent.putExtra("return-data", true);
+
+            startActivityForResult(CropIntent, 1);
+
+        } catch (ActivityNotFoundException e) {
+
+        }
     }
+    //Image Crop Code End Here
+
+    public void EnableRuntimePermission(){
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                Manifest.permission.CAMERA))
+        {
+
+            Toast.makeText(MainActivity.this,"CAMERA permission allows us to Access CAMERA app", Toast.LENGTH_LONG).show();
+
+        } else {
+
+            ActivityCompat.requestPermissions(MainActivity.this,new String[]{
+                    Manifest.permission.CAMERA}, RequestPermissionCode);
+
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int RC, String per[], int[] PResult) {
+
+        switch (RC) {
+
+            case RequestPermissionCode:
+
+                if (PResult.length > 0 && PResult[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    System.out.print("");
+
+                } else {
+
+                    Toast.makeText(MainActivity.this,"", Toast.LENGTH_LONG).show();
+
+                }
+                break;
+        }
+    }
+
 }
